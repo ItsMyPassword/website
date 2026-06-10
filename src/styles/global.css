@@ -6,8 +6,13 @@
  * a flash of the wrong theme. `prefers-color-scheme` is honoured at
  * first visit; an explicit toggle persists to localStorage.
  *
- * Theming tokens are split into two layers:
+ * Theming tokens are split into three layers:
  *   - palette (`--color-ink-*`, `--color-bg-*`) — semantic, theme-swapped
+ *   - materials (`--surface-*`, `--hairline`, `--accent-glow`) — the
+ *     "precision-instrument" depth: layered tinted shadows, a top edge
+ *     highlight that catches light, a sparingly-used sapphire glow.
+ *     Theme-swapped so a card reads as brushed metal on dark and warm
+ *     paper on light without a per-component fork.
  *   - constants (`--font-sans`, easings, animations) — theme-agnostic
  *
  * The hero canvas reads the dot colour from `--color-dot` so it
@@ -28,21 +33,31 @@
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Light palette (the default). Cool grey neutrals. */
-  --color-ink-0: oklch(0.16 0.005 260);
-  --color-ink-1: oklch(0.28 0.005 260);
-  --color-ink-2: oklch(0.42 0.005 260);
-  --color-ink-3: oklch(0.55 0.005 260);
-  --color-ink-4: oklch(0.7 0.005 260);
-  --color-ink-5: oklch(0.88 0.004 260);
+  /* Light palette (the default). Cool platinum neutrals. */
+  --color-ink-0: oklch(0.15 0.006 264);
+  --color-ink-1: oklch(0.27 0.006 264);
+  --color-ink-2: oklch(0.42 0.006 264);
+  --color-ink-3: oklch(0.55 0.005 264);
+  --color-ink-4: oklch(0.7 0.005 264);
+  --color-ink-5: oklch(0.88 0.004 264);
 
-  --color-bg-0: oklch(0.99 0.002 260);
-  --color-bg-1: oklch(0.97 0.003 260);
-  --color-bg-2: oklch(0.94 0.004 260);
+  --color-bg-0: oklch(0.992 0.0015 264);
+  --color-bg-1: oklch(0.972 0.003 264);
+  --color-bg-2: oklch(0.945 0.004 264);
 
-  --color-accent: oklch(0.52 0.08 240);
-  --color-accent-soft: oklch(0.52 0.08 240 / 0.12);
+  --color-accent: oklch(0.5 0.14 248);
+  --color-accent-soft: oklch(0.5 0.14 248 / 0.12);
+  --color-accent-strong: oklch(0.5 0.16 248);
+
+  /* Premium materials (light) */
+  --surface-highlight: oklch(1 0 0 / 0.8);
+  --surface-shadow:
+    0 1px 2px oklch(0.2 0.02 264 / 0.05), 0 10px 30px -16px oklch(0.2 0.02 264 / 0.18),
+    0 30px 60px -34px oklch(0.2 0.02 264 / 0.2);
+  --hairline: oklch(0.2 0.02 264 / 0.1);
+  --accent-glow: oklch(0.5 0.14 248 / 0.22);
 
   /* Hero-specific knobs */
   --color-dot: 0.28 0.004 260;
@@ -111,19 +126,28 @@
 
 /* Dark mode — explicit class on <html> set by the inline boot script. */
 :root.dark {
-  --color-ink-0: oklch(0.96 0.003 260);
-  --color-ink-1: oklch(0.85 0.004 260);
-  --color-ink-2: oklch(0.62 0.004 260);
-  --color-ink-3: oklch(0.42 0.004 260);
-  --color-ink-4: oklch(0.3 0.004 260);
-  --color-ink-5: oklch(0.18 0.004 260);
+  --color-ink-0: oklch(0.97 0.004 260);
+  --color-ink-1: oklch(0.85 0.005 262);
+  --color-ink-2: oklch(0.63 0.006 262);
+  --color-ink-3: oklch(0.45 0.006 262);
+  --color-ink-4: oklch(0.31 0.006 264);
+  --color-ink-5: oklch(0.19 0.007 266);
 
-  --color-bg-0: oklch(0.07 0.005 280);
-  --color-bg-1: oklch(0.11 0.008 280);
-  --color-bg-2: oklch(0.14 0.008 280);
+  --color-bg-0: oklch(0.065 0.007 270);
+  --color-bg-1: oklch(0.105 0.01 270);
+  --color-bg-2: oklch(0.15 0.012 270);
 
-  --color-accent: oklch(0.78 0.05 240);
-  --color-accent-soft: oklch(0.78 0.05 240 / 0.12);
+  --color-accent: oklch(0.72 0.13 245);
+  --color-accent-soft: oklch(0.72 0.13 245 / 0.14);
+  --color-accent-strong: oklch(0.78 0.15 245);
+
+  /* Premium materials (dark): deeper drop shadows, a faint edge highlight */
+  --surface-highlight: oklch(1 0 0 / 0.08);
+  --surface-shadow:
+    0 1px 2px oklch(0 0 0 / 0.4), 0 14px 40px -18px oklch(0 0 0 / 0.6),
+    0 40px 90px -50px oklch(0 0 0 / 0.72);
+  --hairline: oklch(1 0 0 / 0.1);
+  --accent-glow: oklch(0.72 0.13 245 / 0.3);
 
   /* Hero adapts: bright dots on dark canvas, dark vignette, lighter grain */
   --color-dot: 0.92 0.004 260;
@@ -139,16 +163,33 @@
     margin: 0;
     padding: 0;
   }
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
   body {
     background: var(--color-bg-0);
     color: var(--color-ink-2);
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    accent-color: var(--color-accent);
   }
   ::selection {
     background: var(--color-accent-soft);
     color: var(--color-ink-0);
+  }
+  /* One refined, on-brand focus ring everywhere. Keyboard users get a
+     crisp sapphire halo; pointer clicks stay clean (:focus-visible). */
+  :where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-accent-strong);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -165,57 +206,145 @@
     background: linear-gradient(
       180deg,
       var(--color-ink-0) 0%,
-      var(--color-ink-1) 32%,
-      var(--color-ink-2) 68%,
+      var(--color-ink-0) 16%,
+      var(--color-ink-1) 50%,
+      var(--color-ink-2) 80%,
       var(--color-ink-3) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    filter: drop-shadow(0 1px 0 oklch(1 0 0 / 0.05)) drop-shadow(0 18px 40px oklch(0 0 0 / 0.25));
+    filter: drop-shadow(0 1px 0 oklch(1 0 0 / 0.06)) drop-shadow(0 18px 40px oklch(0 0 0 / 0.25));
     user-select: none;
   }
   :root.dark .headline-gradient {
-    filter: drop-shadow(0 1px 0 oklch(1 0 0 / 0.05)) drop-shadow(0 18px 40px oklch(0 0 0 / 0.45));
+    filter: drop-shadow(0 1px 0 oklch(1 0 0 / 0.06)) drop-shadow(0 22px 50px oklch(0 0 0 / 0.5));
   }
 
+  /* Primary CTA: a single brushed-metal pill. A soft gradient fill, an
+     inner top highlight for the edge, a tinted layered shadow, and a
+     light sweep on hover. Spring easing makes the press feel physical. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full
-      bg-(--color-ink-0) text-(--color-bg-0) text-sm font-medium tracking-tight
-      transition-[transform,box-shadow,background-color] duration-200;
+    @apply relative isolate inline-flex h-11 items-center justify-center gap-2 overflow-hidden
+      rounded-full px-5 text-sm font-medium tracking-tight text-(--color-bg-0)
+      transition-[transform,box-shadow,filter] duration-200;
+    background: linear-gradient(180deg, var(--color-ink-0), var(--color-ink-1));
     box-shadow:
-      0 1px 0 oklch(1 0 0 / 0.1) inset,
-      0 12px 28px -8px oklch(0 0 0 / 0.25);
+      inset 0 1px 0 oklch(1 0 0 / 0.16),
+      0 1px 2px oklch(0 0 0 / 0.16),
+      0 12px 28px -10px oklch(0 0 0 / 0.28);
     transition-timing-function: var(--ease-spring);
+  }
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, oklch(1 0 0 / 0.45), transparent);
+    transform: translateX(-180%) skewX(-12deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn-primary > * {
+    position: relative;
+    z-index: 2;
   }
   .btn-primary:hover {
     transform: translateY(-1px);
-    background: var(--color-ink-1);
+    filter: brightness(1.04);
+  }
+  .btn-primary:hover::after {
+    animation: btn-sheen 0.9s var(--ease-out-quint);
   }
   .btn-primary:active {
     transform: translateY(0) scale(0.98);
   }
-  :root.dark .btn-primary {
-    box-shadow:
-      0 1px 0 oklch(1 0 0 / 0.1) inset,
-      0 12px 28px -8px oklch(0 0 0 / 0.5);
+  @keyframes btn-sheen {
+    0% {
+      transform: translateX(-180%) skewX(-12deg);
+      opacity: 0;
+    }
+    18% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(340%) skewX(-12deg);
+      opacity: 0;
+    }
   }
 
+  /* Ghost CTA: a hairline glass pill that lifts and frosts on hover, so
+     it reads as a sibling material to the primary, not an afterthought. */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full
-      bg-transparent text-(--color-ink-1) text-sm font-medium tracking-tight
-      border border-(--color-ink-5) transition-colors duration-200
-      hover:bg-(--color-bg-1) hover:text-(--color-ink-0)
-      hover:border-(--color-ink-4);
+    @apply relative inline-flex h-11 items-center justify-center gap-2 rounded-full
+      border border-(--color-ink-5) bg-transparent px-5 text-sm font-medium tracking-tight
+      text-(--color-ink-1) backdrop-blur-[2px]
+      transition-[color,background-color,border-color,box-shadow,transform] duration-200;
+    transition-timing-function: var(--ease-spring);
+  }
+  .btn-ghost:hover {
+    @apply border-(--color-ink-4) bg-(--color-bg-1) text-(--color-ink-0);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px -14px oklch(0 0 0 / 0.3);
+  }
+  .btn-ghost:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Editorial display scale for section headings. */
+  .h2-display {
+    font-size: clamp(40px, 6.2vw, 80px);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
   }
 
   .mono-tag {
     @apply font-mono text-[10px] uppercase tracking-[0.22em] text-(--color-ink-3);
   }
 
+  /* Elevated material: brushed-metal surface with a lit top edge, a
+     tinted layered shadow, and a measured lift on hover. */
   .surface {
-    @apply rounded-2xl border border-(--color-ink-5) bg-(--color-bg-1)
-      p-6 transition-colors duration-300 hover:border-(--color-ink-4);
+    @apply relative rounded-2xl border border-(--color-ink-5) bg-(--color-bg-1) p-6
+      transition-[transform,border-color,box-shadow] duration-300;
+    box-shadow: var(--surface-shadow);
+    transition-timing-function: var(--ease-out-expo);
+  }
+  .surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 var(--surface-highlight);
+    pointer-events: none;
+  }
+  .surface:hover {
+    border-color: var(--color-ink-4);
+    transform: translateY(-2px);
+  }
+
+  /* Card material with a faint "lit from above" sapphire wash. Pair with
+     `data-spotlight` for the cursor-tracking highlight. */
+  .card-luxe {
+    @apply relative overflow-hidden rounded-2xl border border-(--color-ink-5);
+    background:
+      radial-gradient(
+        120% 90% at 50% -12%,
+        color-mix(in oklch, var(--color-accent) 6%, transparent),
+        transparent 58%
+      ),
+      var(--color-bg-1);
+    box-shadow: var(--surface-shadow);
+  }
+  .card-luxe::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 var(--surface-highlight);
+    pointer-events: none;
   }
 
   .status-pill {
@@ -223,27 +352,58 @@
       tracking-[0.18em] text-(--color-ink-3);
   }
 
-  /* Scroll-reveal: elements fade and lift as they enter the viewport.
-     Children inside [data-reveal-stagger] are revealed with a staggered
-     delay. The animation is fully suppressed under prefers-reduced-motion. */
+  /* Cursor-tracking sapphire spotlight. The ::before sits below content
+     (negative z within the host's own stacking context) so it lights the
+     surface without washing the text. JS feeds --spot-x / --spot-y. */
+  [data-spotlight] {
+    position: relative;
+    isolation: isolate;
+  }
+  [data-spotlight]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      440px circle at var(--spot-x, 50%) var(--spot-y, 0%),
+      var(--color-accent-soft),
+      transparent 56%
+    );
+    opacity: 0;
+    transition: opacity 0.45s var(--ease-out-quint);
+    pointer-events: none;
+  }
+  [data-spotlight]:hover::before {
+    opacity: 1;
+  }
+  @media (hover: none), (prefers-reduced-motion: reduce) {
+    [data-spotlight]::before {
+      display: none;
+    }
+  }
+
+  /* Scroll-reveal: elements fade, lift and settle as they enter the
+     viewport. Children inside [data-reveal-stagger] are revealed with a
+     staggered delay. Fully suppressed under prefers-reduced-motion. */
   [data-reveal] {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(22px) scale(0.992);
     transition:
-      opacity 700ms var(--ease-out-quint),
-      transform 700ms var(--ease-out-quint);
+      opacity 800ms var(--ease-out-expo),
+      transform 800ms var(--ease-out-expo);
     will-change: opacity, transform;
   }
   [data-reveal].is-revealed {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
   [data-reveal-stagger] > * {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(16px);
     transition:
-      opacity 600ms var(--ease-out-quint),
-      transform 600ms var(--ease-out-quint);
+      opacity 640ms var(--ease-out-expo),
+      transform 640ms var(--ease-out-expo);
   }
   [data-reveal-stagger].is-revealed > * {
     opacity: 1;
@@ -274,6 +434,32 @@
       opacity: 1 !important;
       transform: none !important;
       transition: none !important;
+    }
+  }
+
+  /* Reading-progress hairline. A thin sapphire line at the very top edge
+     that fills with scroll position via a scroll-driven animation (no JS,
+     no scroll listener). Where scroll-timeline is unsupported it stays
+     collapsed and invisible — pure progressive enhancement. */
+  .scroll-progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 200;
+    height: 2px;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, transparent, var(--color-accent-strong));
+    pointer-events: none;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes scroll-progress {
+      to {
+        transform: scaleX(1);
+      }
     }
   }
 

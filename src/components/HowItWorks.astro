@@ -10,37 +10,107 @@ const { locale } = Astro.props;
 const t = useT(locale);
 
 const steps = [
-  { label: "01", title: t("how_step1_title"), body: t("how_step1_body") },
-  { label: "02", title: t("how_step2_title"), body: t("how_step2_body") },
-  { label: "03", title: t("how_step3_title"), body: t("how_step3_body") },
+  { title: t("how_step1_title"), body: t("how_step1_body") },
+  { title: t("how_step2_title"), body: t("how_step2_body") },
+  { title: t("how_step3_title"), body: t("how_step3_body") },
 ];
+
+/* Fallback cascade: when scroll-driven animations are unavailable the
+   three steps shift right progressively so the derivation still reads
+   as a flow instead of three equal boxes. */
+const indents = ["", "lg:ml-[22%]", "lg:ml-[44%]"];
 ---
 
-<section id="how-it-works" class="relative isolate border-t border-(--color-ink-5) px-6 py-32">
-  <div class="mx-auto flex w-full max-w-5xl flex-col gap-16">
-    <header data-reveal class="flex max-w-2xl flex-col gap-4">
-      <span class="mono-tag">{t("how_tag")}</span>
-      <h2 class="m-0 text-4xl font-semibold tracking-[-0.025em] text-(--color-ink-0) sm:text-5xl">
-        {t("how_title")}
-      </h2>
-      <p class="m-0 text-pretty text-(--color-ink-2) sm:text-lg">{t("how_body")}</p>
-    </header>
+<section
+  id="how-it-works"
+  class="relative isolate z-[5] scroll-mt-16 overflow-clip bg-(--color-bg-0)"
+>
+  <div class="how-wrap">
+    <div class="how-sticky py-28 sm:py-36">
+      <div class="mx-auto w-full max-w-5xl px-6">
+        <header data-reveal class="flex max-w-2xl flex-col gap-4">
+          <h2 class="h2-display m-0 text-(--color-ink-0)">
+            {t("how_title")}
+          </h2>
+          <p class="m-0 text-pretty text-(--color-ink-2) sm:text-lg">{t("how_body")}</p>
+        </header>
+      </div>
 
-    <ol
-      data-reveal-stagger
-      class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-(--color-ink-5) bg-(--color-ink-5) sm:grid-cols-3"
-    >
-      {
-        steps.map((step) => (
-          <li class="flex flex-col gap-4 bg-(--color-bg-1) p-8">
-            <span class="mono-tag">{step.label}</span>
-            <h3 class="m-0 text-xl font-semibold tracking-[-0.015em] text-(--color-ink-0)">
-              {step.title}
-            </h3>
-            <p class="m-0 text-pretty text-sm leading-relaxed text-(--color-ink-2)">{step.body}</p>
-          </li>
-        ))
-      }
-    </ol>
+      <ol class="how-track m-0 mt-16 flex list-none flex-col gap-16 p-0 px-6 sm:mt-20 lg:gap-20">
+        {
+          steps.map((step, i) => (
+            <li data-reveal class={`how-panel flex max-w-xl flex-col gap-5 ${indents[i]}`}>
+              <span
+                aria-hidden="true"
+                class="block h-2.5 w-2.5 rounded-[2px] border border-(--color-accent) bg-(--color-accent-soft) shadow-[0_0_12px_var(--accent-glow)]"
+              />
+              <h3 class="m-0 text-4xl font-semibold tracking-[-0.03em] text-balance text-(--color-ink-0) sm:text-5xl">
+                {step.title}
+              </h3>
+              <p class="m-0 max-w-md text-pretty text-lg leading-relaxed text-(--color-ink-2)">
+                {step.body}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
   </div>
 </section>
+
+<style>
+  /* Vertical fallback by default. On browsers with scroll-driven
+     animations (>= lg, motion allowed), the wrapper grows to 300vh, the
+     inner block pins to the viewport and vertical scroll pans the three
+     steps horizontally. `contain 0%` means the pan starts exactly when
+     the section pins, never before. */
+  .how-wrap {
+    view-timeline: --how block;
+  }
+  .how-track {
+    max-width: 64rem;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+      .how-wrap {
+        height: 300vh;
+      }
+      .how-sticky {
+        position: sticky;
+        top: 0;
+        display: flex;
+        height: 100dvh;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        padding-block: 0;
+      }
+      .how-track {
+        width: max-content;
+        max-width: none;
+        margin-inline: 0;
+        flex-direction: row;
+        align-items: stretch;
+        gap: clamp(5rem, 10vw, 9rem);
+        padding-inline: max(1.5rem, calc((100vw - 64rem) / 2));
+        animation: how-pan linear both;
+        animation-timeline: --how;
+        animation-range: contain 0% contain 100%;
+        will-change: transform;
+      }
+      .how-panel {
+        width: min(34rem, 70vw);
+        flex-shrink: 0;
+        margin-left: 0 !important;
+      }
+      @keyframes how-pan {
+        to {
+          transform: translateX(calc(-100% + 100vw));
+        }
+      }
+    }
+  }
+</style>

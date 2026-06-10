@@ -18,11 +18,11 @@ const items = [
 ];
 ---
 
-<section id="faq" class="relative isolate border-t border-(--color-ink-5) px-6 py-32">
+<section id="faq" class="relative isolate z-[5] bg-(--color-bg-0) px-6 py-28 sm:py-36">
   <div class="mx-auto flex w-full max-w-4xl flex-col gap-12">
     <header data-reveal class="flex max-w-2xl flex-col gap-4">
       <span class="mono-tag">{t("faq_tag")}</span>
-      <h2 class="m-0 text-4xl font-semibold tracking-[-0.025em] text-(--color-ink-0) sm:text-5xl">
+      <h2 class="h2-display m-0 text-(--color-ink-0)">
         {t("faq_title")}
       </h2>
       <p class="m-0 text-pretty text-(--color-ink-2) sm:text-lg">{t("faq_body")}</p>
@@ -33,12 +33,11 @@ const items = [
       class="flex flex-col divide-y divide-(--color-ink-5) border-y border-(--color-ink-5)"
     >
       {
-        items.map((item, i) => (
+        items.map((item) => (
           <li>
             <details class="group faq-item">
               <summary class="flex cursor-pointer list-none items-baseline gap-6 py-6 transition-colors hover:text-(--color-ink-0)">
-                <span class="mono-tag shrink-0 w-8">{String(i + 1).padStart(2, "0")}</span>
-                <span class="flex-1 text-lg font-medium tracking-[-0.01em] text-(--color-ink-1) group-hover:text-(--color-ink-0)">
+                <span class="flex-1 text-lg font-medium tracking-[-0.01em] text-(--color-ink-1) group-hover:text-(--color-ink-0) sm:text-xl">
                   {item.q}
                 </span>
                 <span
@@ -56,7 +55,7 @@ const items = [
                   </svg>
                 </span>
               </summary>
-              <div class="pb-6 pl-14 pr-10 text-pretty text-(--color-ink-2) leading-relaxed">
+              <div class="max-w-2xl pr-10 pb-6 text-pretty leading-relaxed text-(--color-ink-2)">
                 {item.a}
               </div>
             </details>
@@ -71,5 +70,26 @@ const items = [
   /* Disable the default disclosure marker across browsers. */
   .faq-item summary::-webkit-details-marker {
     display: none;
+  }
+
+  /* Smooth open/close of the answers on browsers that can animate
+     details content height (Chrome 131+). Elsewhere it snaps, as before. */
+  @media (prefers-reduced-motion: no-preference) {
+    .faq-item {
+      interpolate-size: allow-keywords;
+    }
+    .faq-item::details-content {
+      opacity: 0;
+      block-size: 0;
+      overflow-y: clip;
+      transition:
+        content-visibility 0.4s allow-discrete,
+        opacity 0.4s var(--ease-out-quint),
+        block-size 0.4s var(--ease-out-quint);
+    }
+    .faq-item[open]::details-content {
+      opacity: 1;
+      block-size: auto;
+    }
   }
 </style>
