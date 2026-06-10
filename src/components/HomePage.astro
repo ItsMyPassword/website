@@ -2,6 +2,7 @@
 import Layout from "~/layouts/Layout.astro";
 import Hero from "./Hero.astro";
 import Determinism from "./Determinism.astro";
+import Marquee from "./Marquee.astro";
 import HowItWorks from "./HowItWorks.astro";
 import Promise from "./Promise.astro";
 import TrySection from "./TrySection.astro";
@@ -20,6 +21,7 @@ const { locale } = Astro.props;
 <Layout locale={locale} path="/">
   <Hero locale={locale} />
   <Determinism locale={locale} />
+  <Marquee locale={locale} />
   <HowItWorks locale={locale} />
   <Promise locale={locale} />
   <TrySection locale={locale} />

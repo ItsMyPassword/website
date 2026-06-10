@@ -10,10 +10,9 @@ const { locale } = Astro.props;
 const t = useT(locale);
 ---
 
-<section class="relative isolate border-t border-(--color-ink-5) px-6 py-32">
-  <div data-reveal class="mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center">
-    <span class="mono-tag">{t("install_tag")}</span>
-    <h2 class="m-0 text-4xl font-semibold tracking-[-0.025em] text-(--color-ink-0) sm:text-5xl">
+<section class="relative isolate z-[5] bg-(--color-bg-0) px-6 py-28 sm:py-40">
+  <div data-reveal class="mx-auto flex w-full max-w-3xl flex-col items-center gap-7 text-center">
+    <h2 class="h2-display m-0 text-(--color-ink-0)">
       {t("install_title")}
     </h2>
     <p class="m-0 max-w-xl text-pretty text-(--color-ink-2) sm:text-lg">{t("install_body")}</p>
@@ -23,6 +22,7 @@ const t = useT(locale);
         target="_blank"
         rel="noopener noreferrer"
         class="btn-primary"
+        data-magnetic
       >
         <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
           <path
@@ -31,7 +31,16 @@ const t = useT(locale);
         </svg>
         {t("install_get_source")}
       </a>
-      <a href="#try" class="btn-ghost">{t("hero_cta_try")}</a>
+    </div>
+    <div
+      class="flex flex-wrap items-center justify-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase text-(--color-ink-3)"
+    >
+      <span>{t("hero_cta_install")}</span>
+      <span
+        class="rounded-full border border-[color-mix(in_oklch,var(--color-accent)_45%,transparent)] bg-(--color-accent-soft) px-2.5 py-1 text-[10px] text-(--color-accent)"
+      >
+        {t("hero_cta_install_soon")}
+      </span>
     </div>
   </div>
 </section>

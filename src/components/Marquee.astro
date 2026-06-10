@@ -1,0 +1,114 @@
+---
+import { useT } from "~/i18n/index.js";
+import type { Locale } from "~/i18n/translations.js";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useT(locale);
+
+/**
+ * Kinetic restatement of the manifesto between the proof and the
+ * explanation: two counter-scrolling rows, the headline in outline and
+ * the promise in ghost fill. Purely decorative (both lines already
+ * carry the copy elsewhere), so the strip is aria-hidden. Each track
+ * holds two identical groups so the -50% translation loops seamlessly
+ * in the time-based fallback.
+ */
+const lineA = t("hero_headline");
+const lineB = t("promise_title");
+const copies = Array.from({ length: 6 });
+---
+
+<div
+  aria-hidden="true"
+  class="marquee relative isolate z-[5] flex flex-col gap-2 overflow-hidden border-y border-(--color-ink-5) bg-(--color-bg-0) py-10 sm:py-14"
+>
+  <div class="marquee-track marquee-a flex w-max">
+    <div class="flex shrink-0 items-center">
+      {copies.map(() => <span class="marquee-word marquee-outline">{lineA}</span>)}
+    </div>
+    <div class="flex shrink-0 items-center">
+      {copies.map(() => <span class="marquee-word marquee-outline">{lineA}</span>)}
+    </div>
+  </div>
+  <div class="marquee-track marquee-b flex w-max">
+    <div class="flex shrink-0 items-center">
+      {copies.map(() => <span class="marquee-word marquee-ghost">{lineB}</span>)}
+    </div>
+    <div class="flex shrink-0 items-center">
+      {copies.map(() => <span class="marquee-word marquee-ghost">{lineB}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .marquee-word {
+    padding-right: 4.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .marquee-outline {
+    font-size: clamp(54px, 8.5vw, 122px);
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-ink-4);
+  }
+  .marquee-ghost {
+    font-size: clamp(40px, 6vw, 84px);
+    color: var(--color-ink-5);
+  }
+
+  /* Time-based loops by default (rows run in opposite directions);
+     scroll-bound counter-pan where the browser supports scroll-driven
+     animations, so the strip moves with the reader instead of on its
+     own clock. Static under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+      will-change: transform;
+    }
+    .marquee-a {
+      animation: marquee-loop 38s linear infinite;
+    }
+    .marquee-b {
+      animation: marquee-loop 46s linear infinite reverse;
+    }
+    @keyframes marquee-loop {
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    @supports (animation-timeline: view()) {
+      .marquee-a {
+        animation: marquee-fwd linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+      .marquee-b {
+        animation: marquee-rev linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+      @keyframes marquee-fwd {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-34%);
+        }
+      }
+      @keyframes marquee-rev {
+        from {
+          transform: translateX(-34%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+    }
+  }
+</style>

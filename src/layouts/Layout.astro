@@ -95,6 +95,7 @@ const structuredData = {
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body class="min-h-screen overflow-x-hidden">
+    <div class="scroll-progress" aria-hidden="true"></div>
     <GlobalChrome locale={locale} path={path} />
     <slot />
 
@@ -123,6 +124,53 @@ const structuredData = {
         targets.forEach((el) => io.observe(el));
       } else {
         targets.forEach((el) => el.classList.add("is-revealed"));
+      }
+    </script>
+
+    <script>
+      /**
+       * Premium pointer micro-interactions, added as a progressive
+       * enhancement on top of the static layout:
+       *   - [data-magnetic]  CTAs ease toward the cursor within their box
+       *     (the press feels physical without a library).
+       *   - [data-spotlight] surfaces track the cursor with a sapphire
+       *     glow fed through --spot-x / --spot-y (the CSS draws it).
+       *
+       * Both are gated on a fine hover pointer and prefers-reduced-motion,
+       * so touch and reduced-motion users get the clean static surface.
+       */
+      const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (fine && !reduce) {
+        document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach((el) => {
+          el.addEventListener("pointermove", (event) => {
+            const rect = el.getBoundingClientRect();
+            el.style.setProperty("--spot-x", `${event.clientX - rect.left}px`);
+            el.style.setProperty("--spot-y", `${event.clientY - rect.top}px`);
+          });
+        });
+
+        document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((el) => {
+          const STRENGTH = 0.28;
+          const MAX = 6;
+          let raf = 0;
+          el.addEventListener("pointermove", (event) => {
+            const rect = el.getBoundingClientRect();
+            const dx = event.clientX - (rect.left + rect.width / 2);
+            const dy = event.clientY - (rect.top + rect.height / 2);
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => {
+              const x = Math.max(-MAX, Math.min(MAX, dx * STRENGTH));
+              const y = Math.max(-MAX, Math.min(MAX, dy * STRENGTH));
+              el.style.transform = `translate(${x}px, ${y}px)`;
+            });
+          });
+          el.addEventListener("pointerleave", () => {
+            cancelAnimationFrame(raf);
+            el.style.transform = "";
+          });
+        });
       }
     </script>
   </body>
